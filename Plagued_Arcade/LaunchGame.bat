@@ -1,0 +1,1 @@
+"C:\UE_5.1\Engine\Binaries\Win64\UnrealEditor.exe" "C:\Users\trand\Documents\GitHub\Plagued_Arcade\Plagued_Arcade\Plagued_Arcade.uproject" -game -ResX=800 -ResY=900 -WinX=0 -WinY=20 -log
