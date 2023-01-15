@@ -20,6 +20,7 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void TakeDamage(int _amount);
+	bool IsDead();
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Enemy, meta = (AllowPrivateAccess = "true"))
 	class UEnemyComponent* EnemyComponent;

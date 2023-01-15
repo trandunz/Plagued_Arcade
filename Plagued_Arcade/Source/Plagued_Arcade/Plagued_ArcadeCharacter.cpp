@@ -10,6 +10,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Blueprint/UserWidget.h"
+#include "Interactables/MysteryBox.h"
 #include "Weapons/Guns/GunComponent.h"
 #include "Weapons/Guns/M1911.h"
 
@@ -127,6 +128,8 @@ void APlagued_ArcadeCharacter::SetupPlayerInputComponent(class UInputComponent* 
 
 		EnhancedInputComponent->BindAction(FireAction, ETriggerEvent::Triggered, this, &APlagued_ArcadeCharacter::Fire);
 		EnhancedInputComponent->BindAction(ReloadAction, ETriggerEvent::Triggered, this, &APlagued_ArcadeCharacter::Reload);
+
+		EnhancedInputComponent->BindAction(InteractAction, ETriggerEvent::Triggered, this, &APlagued_ArcadeCharacter::TryInteract);
 	}
 }
 
@@ -204,6 +207,20 @@ void APlagued_ArcadeCharacter::Reload()
 		{
 			
 		}
+	}
+}
+
+void APlagued_ArcadeCharacter::TryInteract()
+{
+	FHitResult hitResult;
+	FVector start = GetFPSCamera()->GetComponentLocation();
+	FVector end = start + GetFPSCamera()->GetForwardVector() * 200;
+	FCollisionQueryParams params{};
+	GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params);
+			
+	if (AMysteryBox* mysteryBox  = Cast<AMysteryBox>(hitResult.GetActor()))
+	{
+		mysteryBox->Interact();
 	}
 }
 

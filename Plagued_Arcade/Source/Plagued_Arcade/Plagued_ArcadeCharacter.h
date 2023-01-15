@@ -35,6 +35,7 @@ protected:
 	void StopAim();
 	void Fire();
 	void Reload();
+	void TryInteract();
 	
 // Input //
 private:
@@ -53,6 +54,8 @@ private:
 	class UInputAction* FireAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	class UInputAction* ReloadAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	class UInputAction* InteractAction;
 
 // Components //
 private:

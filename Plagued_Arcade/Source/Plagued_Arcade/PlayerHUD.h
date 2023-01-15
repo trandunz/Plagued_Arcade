@@ -14,6 +14,7 @@ class PLAGUED_ARCADE_API UPlayerHUD : public UUserWidget
 public:
 	void FlashHitMarker();
 	void UpdateAmmoCount(int _currentAmmo, int _maxAmmo);
+	void UpdateRoundText(int _currentRound);
 	
 protected:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -21,6 +22,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UImage* HitMarker;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* RoundText;
 
 	float HitMarkerTimer = 0.0f;
 };

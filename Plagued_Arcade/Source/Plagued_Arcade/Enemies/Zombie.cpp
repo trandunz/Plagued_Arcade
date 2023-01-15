@@ -3,6 +3,7 @@
 #include "EnemyComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
 
 AZombie::AZombie()
 {
@@ -18,6 +19,14 @@ void AZombie::BeginPlay()
 
 void AZombie::Ragdoll()
 {
+	if (APlagued_ArcadeGameMode* gameMode = Cast<APlagued_ArcadeGameMode>(GetWorld()->GetAuthGameMode()))
+	{
+		if (gameMode->NumberOfAliveZombies <= 1 && gameMode->CurrentZombieCount <= 0)
+		{
+			gameMode->PlayRoundEndSound();
+		}
+	}
+	
 	SetReplicateMovement(false);
 
 	DetachFromControllerPendingDestroy();
@@ -63,5 +72,10 @@ void AZombie::TakeDamage(int _amount)
 			}
 		}
 	}
+}
+
+bool AZombie::IsDead()
+{
+	return EnemyComponent->CurrentHealth <= 0;
 }
 

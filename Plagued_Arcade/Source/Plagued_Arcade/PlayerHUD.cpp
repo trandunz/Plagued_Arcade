@@ -34,3 +34,12 @@ void UPlayerHUD::UpdateAmmoCount(int _currentAmmo, int _maxAmmo)
 		AmmoText->SetVisibility(ESlateVisibility::Hidden);
 	}
 }
+
+void UPlayerHUD::UpdateRoundText(int _currentRound)
+{
+	RoundText->SetText({});
+	for(int i = 0 ; i < _currentRound; i++)
+	{
+		RoundText->SetText(FText::FromString(RoundText->GetText().ToString() + " I"));
+	}
+}

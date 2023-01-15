@@ -1,7 +1,11 @@
 #include "ZombieSpawner.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
+
 AZombieSpawner::AZombieSpawner()
 {
+	PrimaryActorTick.bStartWithTickEnabled = true;
 	PrimaryActorTick.bCanEverTick = true;
 }
 
@@ -21,11 +25,14 @@ void AZombieSpawner::Tick(float DeltaTime)
 		{
 			SpawnTimer -= DeltaTime;
 		}
-		else
+		else if (APlagued_ArcadeGameMode* gameMode = Cast<APlagued_ArcadeGameMode>(GetWorld()->GetAuthGameMode()))
 		{
-			SpawnTimer = SpawnInterval;
-			AActor* newZombie = GetWorld()->SpawnActor(Zombie_BP);
-			newZombie->SetActorLocation(GetActorLocation());
+			if (gameMode->CurrentZombieCount > 0)
+			{
+				gameMode->CurrentZombieCount--;
+				SpawnTimer = SpawnInterval;
+				GetWorld()->SpawnActor<AZombie>(Zombie_BP, GetActorLocation(), GetActorRotation());
+			}
 		}
 	}
 }
