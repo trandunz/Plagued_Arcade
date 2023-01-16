@@ -36,6 +36,10 @@ protected:
 	void Fire();
 	void Reload();
 	void TryInteract();
+	void InteractLinetrace();
+
+	UFUNCTION(BlueprintCallable, Category = "Mapping")
+	FKey GetKeyFromInputAction(UInputAction* _action) const;
 	
 // Input //
 private:
@@ -81,6 +85,9 @@ private:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = HUD, meta = (AllowPrivateAccess = "true"))
 	class UPlayerHUD* PlayerHUD;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	FHitResult LastHitResult;
 	
 private:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Weapon, meta = (AllowPrivateAccess = "true"))

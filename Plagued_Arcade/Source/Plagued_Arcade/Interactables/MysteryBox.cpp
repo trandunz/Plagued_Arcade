@@ -19,6 +19,11 @@ AMysteryBox::AMysteryBox()
 	Lid = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LidMesh"));
 	Lid->SetupAttachment(Hinge);
 	Lid->SetRelativeLocation({0, 20, -30});
+
+	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
+	Weapon->SetupAttachment(Mesh);
+	Weapon->SetRelativeLocation({0,0,10});
+	Weapon->SetRelativeRotation({0,90,0});
 }
 
 void AMysteryBox::BeginPlay()
@@ -41,6 +46,17 @@ void AMysteryBox::BeginPlay()
 
 		CloseTimeline.AddInterpFloat(OpenCurve, closeProgress);
 	}
+	if (WeaponCurve)
+	{
+		FOnTimelineFloat upProgress;
+		upProgress.BindUFunction(this, FName("WeaponUpTimelineProgress"));
+
+		FOnTimelineFloat downProgress;
+		downProgress.BindUFunction(this, FName("WeaponDownTimelineProgress"));
+
+		WeaponUpTimeline.AddInterpFloat(WeaponCurve, upProgress);
+		WeaponDownTimeline.AddInterpFloat(WeaponCurve, downProgress);
+	}
 }
 
 void AMysteryBox::TimelineProgress(float _value)
@@ -56,23 +72,39 @@ void AMysteryBox::TimelineProgress(float _value)
 
 void AMysteryBox::WaitTimelineProgress(float _value)
 {
-	if (_value >= 1)
+	if (_value >= 0.5f && !WeaponDownTimeline.IsPlaying())
 	{
-		OpenTimeline.ReverseFromEnd();
-		CloseTimeline.PlayFromStart();
-		WaitTimeline.Stop();
-		UGameplayStatics::PlaySoundAtLocation(GetWorld(), CloseSound, GetActorLocation());
+		WeaponDownTimeline.PlayFromStart();
 	}
 }
 
 void AMysteryBox::CloseTimelineProgress(float _value)
-{
+{	
 	if (_value >= 1)
 	{
 		IsOpen = false;
 		CloseTimeline.Stop();
 		WaitTimeline.Stop();
 		OpenTimeline.Stop();
+		WeaponDownTimeline.Stop();
+	}
+}
+
+void AMysteryBox::WeaponUpTimelineProgress(float _value)
+{
+	Weapon->SetRelativeLocation(FMath::Lerp(FVector{0,0,10}, FVector{0,0,70}, _value));
+}
+
+void AMysteryBox::WeaponDownTimelineProgress(float _value)
+{
+	Weapon->SetRelativeLocation(FMath::Lerp(FVector{0,0,70}, FVector{0,0,10}, _value));
+
+	if (_value >= 0.8f && !CloseTimeline.IsPlaying())
+	{
+		OpenTimeline.ReverseFromEnd();
+		CloseTimeline.PlayFromStart();
+		WaitTimeline.Stop();
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), CloseSound, GetActorLocation());
 	}
 }
 
@@ -82,6 +114,8 @@ void AMysteryBox::Tick(float DeltaTime)
 	OpenTimeline.TickTimeline(DeltaTime);
 	WaitTimeline.TickTimeline(DeltaTime);
 	CloseTimeline.TickTimeline(DeltaTime);
+	WeaponUpTimeline.TickTimeline(DeltaTime);
+	WeaponDownTimeline.TickTimeline(DeltaTime);
 }
 
 void AMysteryBox::Interact()
@@ -90,6 +124,7 @@ void AMysteryBox::Interact()
 	{
 		IsOpen = true;
 		OpenTimeline.PlayFromStart();
+		WeaponUpTimeline.PlayFromStart();
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenSound, GetActorLocation());
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), JingleSound, GetActorLocation());
 	}

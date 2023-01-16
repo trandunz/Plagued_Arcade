@@ -12,6 +12,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Interactables/MysteryBox.h"
 #include "Weapons/Guns/GunComponent.h"
+#include "InputMappingContext.h"
+#include "InputAction.h"
+#include "PlayerStates/PlaguedPlayerState.h"
 #include "Weapons/Guns/M1911.h"
 
 
@@ -96,6 +99,11 @@ void APlagued_ArcadeCharacter::Tick(float DeltaSeconds)
 
 	if (PlayerHUD)
 	{
+		if (APlaguedPlayerState* playerState = GetPlayerState<APlaguedPlayerState>())
+		{
+			PlayerHUD->UpdatePointsText(playerState->CurrentPoints);
+		}
+		
 		if (CurrentWeapon)
 		{
 			if (UGunComponent* gun = Cast<UGunComponent>(CurrentWeapon->FindComponentByClass<UGunComponent>()))
@@ -112,6 +120,8 @@ void APlagued_ArcadeCharacter::Tick(float DeltaSeconds)
 			PlayerHUD->UpdateAmmoCount(0,0);
 		}
 	}
+
+	InteractLinetrace();
 }
 
 void APlagued_ArcadeCharacter::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -212,16 +222,46 @@ void APlagued_ArcadeCharacter::Reload()
 
 void APlagued_ArcadeCharacter::TryInteract()
 {
-	FHitResult hitResult;
-	FVector start = GetFPSCamera()->GetComponentLocation();
-	FVector end = start + GetFPSCamera()->GetForwardVector() * 200;
-	FCollisionQueryParams params{};
-	GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECC_Visibility, params);
-			
-	if (AMysteryBox* mysteryBox  = Cast<AMysteryBox>(hitResult.GetActor()))
+	if (AMysteryBox* mysteryBox  = Cast<AMysteryBox>(LastHitResult.GetActor()))
 	{
 		mysteryBox->Interact();
 	}
+}
+
+void APlagued_ArcadeCharacter::InteractLinetrace()
+{
+	FVector start = GetFPSCamera()->GetComponentLocation();
+	FVector end = start + GetFPSCamera()->GetForwardVector() * 200;
+	FCollisionQueryParams params{};
+	GetWorld()->LineTraceSingleByChannel(LastHitResult, start, end, ECC_Visibility, params);
+
+	if (PlayerHUD)
+	{
+		PlayerHUD->UpdateInteractText("", "");
+
+		if (AMysteryBox* mysteryBox  = Cast<AMysteryBox>(LastHitResult.GetActor()))
+		{
+			if (!mysteryBox->IsOpen)
+			{
+				PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Open Box");
+			}
+		}
+	}
+}
+
+FKey APlagued_ArcadeCharacter::GetKeyFromInputAction(UInputAction* _action) const
+{
+	if (DefaultMappingContext)
+	{
+		for(auto& mapping : DefaultMappingContext->GetMappings())
+		{
+			if (mapping.Action == _action)
+			{
+				return mapping.Key;
+			}
+		}
+	}
+	return {};
 }
 
 

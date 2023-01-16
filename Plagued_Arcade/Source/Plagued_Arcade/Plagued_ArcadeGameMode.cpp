@@ -1,9 +1,11 @@
 #include "Plagued_ArcadeGameMode.h"
 #include "Plagued_ArcadeCharacter.h"
 #include "Enemies/Zombie.h"
+#include "GameStates/PlaguedGameState.h"
 #include "Sound/SoundCue.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Kismet/GameplayStatics.h"
+#include "PlayerStates/PlaguedPlayerState.h"
 
 APlagued_ArcadeGameMode::APlagued_ArcadeGameMode()
 {
@@ -28,8 +30,6 @@ void APlagued_ArcadeGameMode::BeginPlay()
 void APlagued_ArcadeGameMode::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
-
-	UE_LOG(LogTemp, Warning, TEXT("Gamemode Ticking"));
 	
 	TArray<AActor*> FoundActors;
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AZombie::StaticClass(), FoundActors);
@@ -73,7 +73,10 @@ void APlagued_ArcadeGameMode::ChangeRound()
 
 	if (APlagued_ArcadeCharacter* character = Cast<APlagued_ArcadeCharacter>(GetWorld()->GetFirstLocalPlayerFromController()->PlayerController->GetCharacter()))
 	{
-		character->GetPlayerHUD()->UpdateRoundText(CurrentRound);
+		if (character->GetPlayerHUD())
+		{
+			character->GetPlayerHUD()->UpdateRoundText(CurrentRound);
+		}
 	}
 }
 

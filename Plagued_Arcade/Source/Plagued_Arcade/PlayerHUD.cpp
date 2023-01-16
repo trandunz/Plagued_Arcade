@@ -37,9 +37,33 @@ void UPlayerHUD::UpdateAmmoCount(int _currentAmmo, int _maxAmmo)
 
 void UPlayerHUD::UpdateRoundText(int _currentRound)
 {
-	RoundText->SetText({});
-	for(int i = 0 ; i < _currentRound; i++)
+	if (RoundText)
 	{
-		RoundText->SetText(FText::FromString(RoundText->GetText().ToString() + " I"));
+		RoundText->SetText({});
+		for(int i = 0 ; i < _currentRound; i++)
+		{
+			RoundText->SetText(FText::FromString(RoundText->GetText().ToString() + " I"));
+		}
+	}
+}
+
+void UPlayerHUD::UpdateInteractText(FString _inputKey, FString _newText)
+{
+	if (_newText == "")
+	{
+		InteractText->SetVisibility(ESlateVisibility::Hidden);
+	}
+	else
+	{
+		InteractText->SetText(FText::FromString("Press " + _inputKey + " " + _newText));
+		InteractText->SetVisibility(ESlateVisibility::Visible);
+	}
+}
+
+void UPlayerHUD::UpdatePointsText(int _currentPoints)
+{
+	if (PointsText)
+	{
+		PointsText->SetText(FText::FromString(FString::FromInt(_currentPoints)));
 	}
 }

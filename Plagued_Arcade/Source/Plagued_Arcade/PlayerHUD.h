@@ -15,6 +15,8 @@ public:
 	void FlashHitMarker();
 	void UpdateAmmoCount(int _currentAmmo, int _maxAmmo);
 	void UpdateRoundText(int _currentRound);
+	void UpdateInteractText(FString _inputKey, FString _newText);
+	void UpdatePointsText(int _currentPoints);
 	
 protected:
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
@@ -25,6 +27,12 @@ protected:
 
 	UPROPERTY(EditAnywhere, meta = (BindWidget))
 	class UTextBlock* RoundText;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* InteractText;
+
+	UPROPERTY(EditAnywhere, meta = (BindWidget))
+	class UTextBlock* PointsText;
 
 	float HitMarkerTimer = 0.0f;
 };

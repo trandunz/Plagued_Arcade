@@ -21,4 +21,7 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	int CurrentHealth;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	int WorthInPoints = 100;
 };

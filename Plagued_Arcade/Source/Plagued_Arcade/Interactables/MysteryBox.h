@@ -23,7 +23,10 @@ protected:
 	UFUNCTION()
 	void CloseTimelineProgress(float _value);
 
-	bool IsOpen = false;
+	UFUNCTION()
+	void WeaponUpTimelineProgress(float _value);
+	UFUNCTION()
+	void WeaponDownTimelineProgress(float _value);
 
 public:	
 	virtual void Tick(float DeltaTime) override;
@@ -37,16 +40,26 @@ protected:
 	class UStaticMeshComponent* Lid;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UStaticMeshComponent* Weapon;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class USceneComponent* Hinge;
 
 	FTimeline OpenTimeline;
 	FTimeline WaitTimeline;
 	FTimeline CloseTimeline;
+
+	FTimeline WeaponUpTimeline;
+	FTimeline WeaponDownTimeline;
+	
 	UPROPERTY(EditAnywhere, Category = Timeline)
 	class UCurveFloat* OpenCurve;
 
+	UPROPERTY(EditAnywhere, Category = Timeline)
+	class UCurveFloat* WeaponCurve;
+
 	UPROPERTY(EditAnywhere, Category = BoxSettings)
-	float OpenDuration = 5.0f;
+	float OpenDuration = 15.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class USoundWave* OpenSound;
@@ -54,4 +67,7 @@ protected:
 	class USoundWave* JingleSound;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class USoundWave* CloseSound;
+
+public:
+	bool IsOpen = false;
 };
