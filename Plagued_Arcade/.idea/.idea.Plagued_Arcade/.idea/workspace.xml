@@ -11,6 +11,9 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/../../../../../../UE_5.1/Engine/Source/Runtime/Core/Public/Containers/Array.h" root0="FORCE_HIGHLIGHTING" />
+  </component>
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
@@ -160,6 +163,7 @@
       <workItem from="1673727708603" duration="27550000" />
       <workItem from="1673766899339" duration="9450000" />
       <workItem from="1673843972679" duration="7800000" />
+      <workItem from="1673929802284" duration="4155000" />
     </task>
     <servers />
   </component>

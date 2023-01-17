@@ -2,7 +2,31 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Plagued_ArcadeGameMode.generated.h"
+
+USTRUCT(BlueprintType)
+struct FWeaponStruct
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TSubclassOf<AActor> Prefab;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	USkeletalMesh* Mesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Name;
+
+	bool operator == (FWeaponStruct &rhs) const
+	{
+		if (Mesh == rhs.Mesh)
+			return true;
+		else
+			return false;
+	}
+};
 
 UCLASS(minimalapi)
 class APlagued_ArcadeGameMode : public AGameModeBase
@@ -33,6 +57,9 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class USoundCue* RoundEndSound;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	TArray<FWeaponStruct> WeaponList;
 };
 
 

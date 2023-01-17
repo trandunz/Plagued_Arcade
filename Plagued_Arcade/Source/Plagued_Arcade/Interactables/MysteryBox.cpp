@@ -3,6 +3,7 @@
 #include "ARTypes.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
 
 
 AMysteryBox::AMysteryBox()
@@ -20,7 +21,7 @@ AMysteryBox::AMysteryBox()
 	Lid->SetupAttachment(Hinge);
 	Lid->SetRelativeLocation({0, 20, -30});
 
-	Weapon = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Weapon"));
+	Weapon = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Weapon"));
 	Weapon->SetupAttachment(Mesh);
 	Weapon->SetRelativeLocation({0,0,10});
 	Weapon->SetRelativeRotation({0,90,0});
@@ -90,13 +91,39 @@ void AMysteryBox::CloseTimelineProgress(float _value)
 	}
 }
 
+// Add % chance to gun showing up
 void AMysteryBox::WeaponUpTimelineProgress(float _value)
 {
 	Weapon->SetRelativeLocation(FMath::Lerp(FVector{0,0,10}, FVector{0,0,70}, _value));
+
+	if (WeaponChangeTimer <= 0)
+	{
+		if (APlagued_ArcadeGameMode* gameMode = GetWorld()->GetAuthGameMode<APlagued_ArcadeGameMode>())
+		{
+			TArray<FWeaponStruct> guns = gameMode->WeaponList;
+			for(int i = 0; i < guns.Num(); i++)
+			{
+				if (guns[i].Mesh == Weapon->GetSkeletalMeshAsset())
+				{
+					guns.RemoveAt(i);
+				}
+			}
+			Weapon->SetSkeletalMesh(guns[rand() % guns.Num()].Mesh);
+		}
+
+		WeaponChangeTimer = WeaponChangeSpeed;
+	}
+	else
+	{
+		WeaponChangeTimer -= _value - CachedValue;
+	}
+
+	CachedValue = _value;
 }
 
 void AMysteryBox::WeaponDownTimelineProgress(float _value)
 {
+	
 	Weapon->SetRelativeLocation(FMath::Lerp(FVector{0,0,70}, FVector{0,0,10}, _value));
 
 	if (_value >= 0.8f && !CloseTimeline.IsPlaying())
@@ -111,6 +138,7 @@ void AMysteryBox::WeaponDownTimelineProgress(float _value)
 void AMysteryBox::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	
 	OpenTimeline.TickTimeline(DeltaTime);
 	WaitTimeline.TickTimeline(DeltaTime);
 	CloseTimeline.TickTimeline(DeltaTime);
@@ -125,6 +153,7 @@ void AMysteryBox::Interact()
 		IsOpen = true;
 		OpenTimeline.PlayFromStart();
 		WeaponUpTimeline.PlayFromStart();
+		WeaponChangeTimer = 0.0f;
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenSound, GetActorLocation());
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), JingleSound, GetActorLocation());
 	}

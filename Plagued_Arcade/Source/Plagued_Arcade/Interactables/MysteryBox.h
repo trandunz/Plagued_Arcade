@@ -40,7 +40,7 @@ protected:
 	class UStaticMeshComponent* Lid;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
-	class UStaticMeshComponent* Weapon;
+	class USkeletalMeshComponent* Weapon;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
 	class USceneComponent* Hinge;
@@ -70,4 +70,8 @@ protected:
 
 public:
 	bool IsOpen = false;
+
+	float CachedValue = 0.0f;
+	float WeaponChangeTimer = 0.0f;
+	float WeaponChangeSpeed = 0.05f;
 };
