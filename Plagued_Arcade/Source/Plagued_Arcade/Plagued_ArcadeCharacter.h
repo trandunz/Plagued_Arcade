@@ -7,6 +7,7 @@
 #include "InputActionValue.h"
 #include "PlayerHUD.h"
 #include "Weapons/Guns/M1911.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
 #include "Plagued_ArcadeCharacter.generated.h"
 
 
@@ -20,6 +21,9 @@ public:
 
 	class UCameraComponent* GetFPSCamera();
 	class UPlayerHUD* GetPlayerHUD();
+
+	UFUNCTION(BlueprintCallable)
+	void EquipWeapon(FWeaponStruct& _weapon);
 
 protected:
 	virtual void BeginPlay();
@@ -37,6 +41,7 @@ protected:
 	void Reload();
 	void TryInteract();
 	void InteractLinetrace();
+	void DestroyHeldWeapon();
 
 	UFUNCTION(BlueprintCallable, Category = "Mapping")
 	FKey GetKeyFromInputAction(UInputAction* _action) const;

@@ -1,9 +1,13 @@
 #include "MysteryBox.h"
 
 #include "ARTypes.h"
+#include "Components/SlateWrapperTypes.h"
 #include "Components/StaticMeshComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "Plagued_Arcade/Plagued_ArcadeCharacter.h"
 #include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
+#include "InteractComponent.h"
+#include "Plagued_Arcade/PlayerStates/PlaguedPlayerState.h"
 
 
 AMysteryBox::AMysteryBox()
@@ -25,6 +29,8 @@ AMysteryBox::AMysteryBox()
 	Weapon->SetupAttachment(Mesh);
 	Weapon->SetRelativeLocation({0,0,10});
 	Weapon->SetRelativeRotation({0,90,0});
+
+	InteractComponent = CreateDefaultSubobject<UInteractComponent>(TEXT("Interact Component"));
 }
 
 void AMysteryBox::BeginPlay()
@@ -84,6 +90,7 @@ void AMysteryBox::CloseTimelineProgress(float _value)
 	if (_value >= 1)
 	{
 		IsOpen = false;
+		IsGunReady = false;
 		CloseTimeline.Stop();
 		WaitTimeline.Stop();
 		OpenTimeline.Stop();
@@ -108,7 +115,9 @@ void AMysteryBox::WeaponUpTimelineProgress(float _value)
 					guns.RemoveAt(i);
 				}
 			}
-			Weapon->SetSkeletalMesh(guns[rand() % guns.Num()].Mesh);
+			ChosenWeapon = guns[rand() % guns.Num()];
+			Weapon->SetSkeletalMesh(ChosenWeapon.Mesh);
+			
 		}
 
 		WeaponChangeTimer = WeaponChangeSpeed;
@@ -119,6 +128,10 @@ void AMysteryBox::WeaponUpTimelineProgress(float _value)
 	}
 
 	CachedValue = _value;
+
+	if (_value >= 1)
+		IsGunReady = true;
+		
 }
 
 void AMysteryBox::WeaponDownTimelineProgress(float _value)
@@ -146,16 +159,43 @@ void AMysteryBox::Tick(float DeltaTime)
 	WeaponDownTimeline.TickTimeline(DeltaTime);
 }
 
-void AMysteryBox::Interact()
+void AMysteryBox::Interact(APlaguedPlayerState* _playerState)
 {
-	if (!IsOpen)
+	if (!IsOpen && _playerState->CurrentPoints >= GetInteractCost())
 	{
+		_playerState->CurrentPoints -= GetInteractCost();
+		
 		IsOpen = true;
+		Weapon->SetVisibility(true);
 		OpenTimeline.PlayFromStart();
 		WeaponUpTimeline.PlayFromStart();
 		WeaponChangeTimer = 0.0f;
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), OpenSound, GetActorLocation());
 		UGameplayStatics::PlaySoundAtLocation(GetWorld(), JingleSound, GetActorLocation());
 	}
+	else if (IsGunReady)
+	{
+		// Give player the weapon
+		OpenTimeline.ReverseFromEnd();
+		CloseTimeline.PlayFromStart();
+		WaitTimeline.Stop();
+		IsGunReady = false;
+		Weapon->SetVisibility(false);
+		if (APlagued_ArcadeCharacter* character = Cast<APlagued_ArcadeCharacter>(GetWorld()->GetFirstPlayerController()->GetCharacter()))
+		{
+			character->EquipWeapon(ChosenWeapon);
+		}
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), CloseSound, GetActorLocation());
+	}
+}
+
+int AMysteryBox::GetInteractCost()
+{
+	if (InteractComponent)
+	{
+		return InteractComponent->InteractCost;
+	}
+
+	return {};
 }
 

@@ -13,6 +13,7 @@
 #include "Interactables/MysteryBox.h"
 #include "Weapons/Guns/GunComponent.h"
 #include "InputMappingContext.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
 #include "InputAction.h"
 #include "PlayerStates/PlaguedPlayerState.h"
 #include "Weapons/Guns/M1911.h"
@@ -51,6 +52,13 @@ UCameraComponent* APlagued_ArcadeCharacter::GetFPSCamera()
 UPlayerHUD* APlagued_ArcadeCharacter::GetPlayerHUD()
 {
 	return PlayerHUD;
+}
+
+void APlagued_ArcadeCharacter::EquipWeapon(FWeaponStruct& _weapon)
+{
+	DestroyHeldWeapon();
+	CurrentWeapon = GetWorld()->SpawnActor(_weapon.Prefab);
+	CurrentWeapon->AttachToComponent(FirstPersonArms, FAttachmentTransformRules::SnapToTargetNotIncludingScale, FName("PistolSocket"));	
 }
 
 void APlagued_ArcadeCharacter::BeginPlay()
@@ -222,9 +230,9 @@ void APlagued_ArcadeCharacter::Reload()
 
 void APlagued_ArcadeCharacter::TryInteract()
 {
-	if (AMysteryBox* mysteryBox  = Cast<AMysteryBox>(LastHitResult.GetActor()))
+	if (IInteractInterface* interactable = Cast<IInteractInterface>(LastHitResult.GetActor()))
 	{
-		mysteryBox->Interact();
+		interactable->Interact(GetPlayerState<APlaguedPlayerState>());
 	}
 }
 
@@ -234,7 +242,7 @@ void APlagued_ArcadeCharacter::InteractLinetrace()
 	FVector end = start + GetFPSCamera()->GetForwardVector() * 200;
 	FCollisionQueryParams params{};
 	GetWorld()->LineTraceSingleByChannel(LastHitResult, start, end, ECC_Visibility, params);
-
+	
 	if (PlayerHUD)
 	{
 		PlayerHUD->UpdateInteractText("", "");
@@ -243,9 +251,22 @@ void APlagued_ArcadeCharacter::InteractLinetrace()
 		{
 			if (!mysteryBox->IsOpen)
 			{
-				PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Open Box");
+				PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Open Box (" + FString::FromInt(mysteryBox->GetInteractCost()) + ")");
+			}
+			else if (mysteryBox->IsGunReady)
+			{
+				PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Pickup " + mysteryBox->ChosenWeapon.Name);
 			}
 		}
+	}
+}
+
+void APlagued_ArcadeCharacter::DestroyHeldWeapon()
+{
+	if (CurrentWeapon)
+	{
+		CurrentWeapon->Destroy();
+		CurrentWeapon = nullptr;
 	}
 }
 

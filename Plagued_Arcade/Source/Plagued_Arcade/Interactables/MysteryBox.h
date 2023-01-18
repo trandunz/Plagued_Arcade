@@ -3,10 +3,12 @@
 #include "CoreMinimal.h"
 #include "Components/TimelineComponent.h"
 #include "GameFramework/Actor.h"
+#include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
+#include "Plagued_Arcade/Interfaces/InteractInterface.h"
 #include "MysteryBox.generated.h"
 
 UCLASS()
-class PLAGUED_ARCADE_API AMysteryBox : public AActor
+class PLAGUED_ARCADE_API AMysteryBox : public AActor, public IInteractInterface
 {
 	GENERATED_BODY()
 	
@@ -30,7 +32,9 @@ protected:
 
 public:	
 	virtual void Tick(float DeltaTime) override;
-	void Interact();
+	virtual void Interact(class APlaguedPlayerState* _playerState) override;
+
+	int GetInteractCost();
 
 protected:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly)
@@ -70,8 +74,15 @@ protected:
 
 public:
 	bool IsOpen = false;
+	bool IsGunReady = false;
+	FWeaponStruct ChosenWeapon;
 
 	float CachedValue = 0.0f;
 	float WeaponChangeTimer = 0.0f;
-	float WeaponChangeSpeed = 0.05f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	float WeaponChangeSpeed = 0.025f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	class UInteractComponent* InteractComponent;
 };
