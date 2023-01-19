@@ -15,6 +15,7 @@
 #include "InputMappingContext.h"
 #include "Plagued_Arcade/Plagued_ArcadeGameMode.h"
 #include "InputAction.h"
+#include "Interactables/Wallchalk.h"
 #include "PlayerStates/PlaguedPlayerState.h"
 #include "Weapons/Guns/M1911.h"
 
@@ -257,6 +258,10 @@ void APlagued_ArcadeCharacter::InteractLinetrace()
 			{
 				PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Pickup " + mysteryBox->ChosenWeapon.Name);
 			}
+		}
+		else if (AWallchalk* wallchalk = Cast<AWallchalk>(LastHitResult.GetActor()))
+		{
+			PlayerHUD->UpdateInteractText(GetKeyFromInputAction(InteractAction).ToString(), "To Buy " + wallchalk->Weapon.Name + "(" + FString::FromInt(wallchalk->InteractComponent->InteractCost) + ")");
 		}
 	}
 }

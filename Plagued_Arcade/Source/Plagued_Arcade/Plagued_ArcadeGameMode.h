@@ -19,6 +19,9 @@ struct FWeaponStruct
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString Name;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UTexture* WallChalkTexture;
+
 	bool operator == (FWeaponStruct &rhs) const
 	{
 		if (Mesh == rhs.Mesh)
